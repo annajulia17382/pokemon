@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Pokémon Mini</title>
+
+<style>
+
+body{
+
+margin:0;
+
+background:#111;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+height:100vh;
+
+font-family:monospace;
+
+}
+
+.game{
+
+width:420px;
+
+height:620px;
+
+background:#9bbc0f;
+
+border:8px solid #222;
+
+border-radius:20px;
+
+padding:10px;
+
+box-sizing:border-box;
+
+}
+
+.screen{
+
+height:500px;
+
+background:#0f380f;
+
+color:#9bbc0f;
+
+border:4px inset #306230;
+
+padding:10px;
+
+overflow:auto;
+
+box-sizing:border-box;
+
+}
+
+button{
+
+width:100%;
+
+padding:12px;
+
+margin-top:10px;
+
+background:#306230;
+
+border:none;
+
+color:#9bbc0f;
+
+font-family:monospace;
+
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#3d7a3d;
+
+}
+
+.menu{
+
+display:flex;
+
+justify-content:space-between;
+
+margin-top:20px;
+
+}
+
+.card{
+
+width:110px;
+
+background:#306230;
+
+padding:5px;
+
+text-align:center;
+
+cursor:pointer;
+
+border-radius:10px;
+
+}
+
+.card:hover{
+
+background:#3d7a3d;
+
+transform:scale(1.05);
+
+}
+
+.pokemon{
+
+width:64px;
+
+height:64px;
+
+image-rendering:pixelated;
+
+}
+
+.bigPokemon{
+
+width:96px;
+
+height:96px;
+
+image-rendering:pixelated;
+
+}
+
+.map{
+
+width:300px;
+
+height:300px;
+
+display:grid;
+
+grid-template-columns:repeat(10,1fr);
+
+grid-template-rows:repeat(10,1fr);
+
+margin:auto;
+
+margin-top:20px;
+
+}
+
+.grass{
+
+background:#2f6b2f;
+
+border:1px solid #295929;
+
+}
+
+.player{
+
+background:#ffcc00;
+
+border:1px solid #d4a900;
+
+}
+
+.center{
+
+text-align:center;
+
+}
+
+input{
+
+width:95%;
+
+padding:10px;
+
+margin-top:10px;
+
+font-family:monospace;
+
+}
+
+.blink{
+
+animation:blink 1s infinite;
+
+}
+
+@keyframes blink{
+
+50%{
+
+opacity:0;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="game">
+
+<div
+
+class="screen"
+
+id="screen"
+
+>
+
+</div>
+
+<button onclick="action()">
+
+ACTION
+
+</button>
+
+</div>
+<script>
+
+let state = 0;
+
+// 0 = Tela inicial
+// 1 = Escolha do inicial
+// 2 = Mapa
+// 3 = Batalha
+// 4 = Login
+// 5 = Versão escolhida
+
+let starter = "";
+let version = "";
+
+let playerHP = 30;
+let enemyHP = 30;
+
+let playerPos = {
+    x:0,
+    y:0
+};
+
+let enemy = {
+    name:"",
+    img:""
+};
+
+const enemies = [
+
+{
+    name:"Pidgey",
+    img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/16.png"
+},
+
+{
+    name:"Rattata",
+    img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png"
+},
+
+{
+    name:"Caterpie",
+    img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png"
+},
+
+{
+    name:"Weedle",
+    img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/13.png"
+},
+
+{
+    name:"Zubat",
+    img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/41.png"
+}
+
+];
+
+function pokemonImg(type,size){
+
+let src="";
+
+if(type==="fire")
+src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png";
+
+if(type==="grass")
+src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png";
+
+if(type==="water")
+src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png";
+
+return `
+<img
+src="${src}"
+class="${size}"
+>
+`;
+
+}
+
+function pick(type){
+
+starter=type;
+
+state=2;
+
+render();
+
+}
+
+function randomEnemy(){
+
+enemy=enemies[
+Math.floor(
+Math.random()*enemies.length
+)
+];
+
+}
+
+function render(){
+
+let screen=document.getElementById("screen");
+
+/* TELA INICIAL */
+
+if(state===0){
+
+screen.innerHTML=`
+
+<h2>POKÉMON MINI</h2>
+
+<hr>
+
+<div class="center">
+
+Pressione ACTION
+
+<br><br>
+
+<span class="blink">
+
+COMEÇAR
+
+</span>
+
+</div>
+
+`;
+
+}
+
+
+/* ESCOLHA */
+
+if(state===1){
+
+screen.innerHTML=`
+
+<h2>
+
+Professor Carvalho
+
+</h2>
+
+Escolha seu Pokémon inicial:
+
+<div class="menu">
+
+<div
+class="card"
+onclick="pick('fire')"
+>
+
+${pokemonImg("fire","pokemon")}
+
+<br>
+
+Charmander
+
+</div>
+
+
+<div
+class="card"
+onclick="pick('grass')"
+>
+
+${pokemonImg("grass","pokemon")}
+
+<br>
+
+Bulbasaur
+
+</div>
+
+
+<div
+class="card"
+onclick="pick('water')"
+>
+
+${pokemonImg("water","pokemon")}
+
+<br>
+
+Squirtle
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* MAPA */
+
+if(state===2){
+
+screen.innerHTML=`
+
+<h2>Mapa</h2>
+
+<div class="center">
+
+Seu Pokémon
+
+<br>
+
+${pokemonImg(starter,"bigPokemon")}
+
+<br>
+
+HP:
+
+${playerHP}
+
+<br><br>
+
+Use as setas para andar.
+
+</div>
+
+<div
+
+class="map"
+
+id="map"
+
+>
+
+</div>
+
+`;
+
+drawMap();
+
+}
+
+
+/* BATALHA */
+
+if(state===3){
+
+screen.innerHTML=`
+
+<h2>
+
+BATALHA
+
+</h2>
+
+<div class="center">
+
+Seu Pokémon
+
+<br>
+
+${pokemonImg(starter,"bigPokemon")}
+
+<br><br>
+
+VS
+
+<br><br>
+
+${enemy.name}
+
+<br>
+
+<img
+
+src="${enemy.img}"
+
+class="bigPokemon"
+
+>
+
+<br><br>
+
+HP do inimigo:
+
+${enemyHP}
+
+<br>
+
+Seu HP:
+
+${playerHP}
+
+<br><br>
+
+Pressione ACTION
+
+para atacar
+
+</div>
+
+`;
+
+}
+
+
+/* LOGIN */
+
+if(state===4){
+
+screen.innerHTML=`
+
+<h2>
+
+VOCÊ VENCEU!
+
+</h2>
+
+Faça login:
+
+<input
+
+id="user"
+
+placeholder="Usuário"
+
+>
+
+<input
+
+id="pass"
+
+type="password"
+
+placeholder="Senha"
+
+>
+
+<button
+
+onclick="login()"
+
+>
+
+Entrar
+
+</button>
+
+`;
+
+}
+
+
+/* VERSÃO */
+
+if(state===5){
+
+screen.innerHTML=`
+
+<h2>
+
+${version}
+
+</h2>
+
+<div class="center">
+
+Login realizado!
+
+<br><br>
+
+${pokemonImg(starter,"bigPokemon")}
+
+<br><br>
+
+Bem-vindo à aventura!
+
+</div>
+
+`;
+
+}
+
+}
+
+
+/* MAPA */
+
+function drawMap(){
+
+let map=document.getElementById("map");
+
+if(!map) return;
+
+map.innerHTML="";
+
+for(let y=0;y<10;y++){
+
+for(let x=0;x<10;x++){
+
+let cls="grass";
+
+if(
+x===playerPos.x
+&&
+y===playerPos.y
+){
+
+cls="player";
+
+}
+
+map.innerHTML+=`
+
+<div
+
+class="${cls}"
+
+>
+
+</div>
+
+`;
+
+}
+
+}
+
+}
+
+
+/* BOTÃO ACTION */
+
+function action(){
+
+if(state===0){
+
+state=1;
+
+render();
+
+return;
+
+}
+
+
+if(state===3){
+
+attack();
+
+return;
+
+}
+
+}
+
+
+/* MOVIMENTO */
+
+document.addEventListener(
+
+"keydown",
+
+(e)=>{
+
+if(state!==2)
+
+return;
+
+
+if(e.key==="ArrowUp")
+
+playerPos.y--;
+
+
+if(e.key==="ArrowDown")
+
+playerPos.y++;
+
+
+if(e.key==="ArrowLeft")
+
+playerPos.x--;
+
+
+if(e.key==="ArrowRight")
+
+playerPos.x++;
+
+
+limit();
+
+drawMap();
+
+
+if(Math.random()<0.20){
+
+randomEnemy();
+
+enemyHP=30;
+
+state=3;
+
+render();
+
+}
+
+}
+
+);
+
+
+/* LIMITES */
+
+function limit(){
+
+playerPos.x=Math.max(
+0,
+Math.min(
+9,
+playerPos.x
+)
+);
+
+
+playerPos.y=Math.max(
+0,
+Math.min(
+9,
+playerPos.y
+)
+);
+
+}
+
+
+/* ATAQUE */
+
+function attack(){
+
+enemyHP-=10;
+
+playerHP-=5;
+
+
+if(enemyHP<=0){
+
+state=4;
+
+render();
+
+return;
+
+}
+
+
+if(playerHP<=0){
+
+alert("Você perdeu!");
+
+playerHP=30;
+
+enemyHP=30;
+
+starter="";
+
+state=0;
+
+render();
+
+return;
+
+}
+
+
+render();
+
+}
+
+
+/* LOGIN */
+
+function login(){
+
+let user=document
+.getElementById("user")
+.value;
+
+
+let pass=document
+.getElementById("pass")
+.value;
+
+
+if(
+user===""
+||
+pass===""
+){
+
+alert("Preencha todos os campos!");
+
+return;
+
+}
+
+
+if(starter==="fire")
+
+version="POKÉMON RED VERSION";
+
+
+if(starter==="water")
+
+version="POKÉMON BLUE VERSION";
+
+
+if(starter==="grass")
+
+version="POKÉMON GREEN VERSION";
+
+
+state=5;
+
+render();
+
+}
+
+
+/* INICIAR */
+
+render();
+
+</script>
+
+</body>
+
+</html>
